@@ -35,6 +35,22 @@ pipeline {
                 }
             }
         }
+        stage('Tag image') {
+            steps {
+                sshagent(['ansible-demo']) {
+                    // Execute the Docker build command remotely on the Ansible server
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.31.93 "docker tag nginx-image shahalam8535/nginx-image:v1"'
+                }
+            }
+        }
+        stage('Push Image') {
+            steps {
+                sshagent(['ansible-demo']) {
+                    // Execute the Docker build command remotely on the Ansible server
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.31.93 "docker push nginx-image shahalam8535/nginx-image:latest"'
+                }
+            }
+        }
     }
 
     post {
