@@ -2,52 +2,29 @@ pipeline {
     agent any
 
     stages {
-        stage('Git Checkout') {
+        stage('Git checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/mohd-shahalam/DevOPs_Project1.git'
             }
         }
-
-        stage('Send Files to Ansible Server') {
+        stage('Sending Docker File to Ansible Server Over SSH') {
             steps {
-                sshagent(['ansible-demo']) {  // Using the credentials with ID 'ansible-demo'
-                    // Send the required files to the Ansible server
+                sshagent(['ansible-demo']) {
                     sh 'scp -o StrictHostKeyChecking=no Dockerfile ubuntu@172.31.31.93:/home/ubuntu/'
-                    sh 'scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/pipeline-test/* ubuntu@172.31.31.93:/home/ubuntu/'
                 }
             }
         }
-
-        stage('Build on Ansible Server') {
+        stage('Build Docker Image') {
             steps {
                 sshagent(['ansible-demo']) {
-                    // Execute the Docker build command remotely on the Ansible server
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.31.93 "cd /home/ubuntu && docker build -t nginx-image ."'
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.31.93 "docker build -t nginx-image /home/ubuntu/"'
                 }
             }
         }
-
-        stage('Run Docker Container on Ansible Server') {
+        stage('Tag and Push Docker Image') {
             steps {
                 sshagent(['ansible-demo']) {
-                    // Run the Docker container on the Ansible server
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.31.93 "docker run -d -p 8080:80 --name nginx-container nginx-image"'
-                }
-            }
-        }
-        stage('Tag image') {
-            steps {
-                sshagent(['ansible-demo']) {
-                    // Execute the Docker build command remotely on the Ansible server
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.31.93 "docker tag nginx-image shahalam8535/nginx-image:v1"'
-                }
-            }
-        }
-        stage('Push Image') {
-            steps {
-                sshagent(['ansible-demo']) {
-                    // Execute the Docker build command remotely on the Ansible server
-                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.31.93 "docker push nginx-image shahalam8535/nginx-image:latest"'
+                    sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.31.93 "docker tag nginx-image shahalam8535/nginx-image:latest && docker push shahalam8535/nginx-image:latest"'
                 }
             }
         }
