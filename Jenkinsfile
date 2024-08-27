@@ -11,8 +11,18 @@ pipeline {
             steps {
                 sshagent(['ansible-demo']) {
                     sh 'scp -o StrictHostKeyChecking=no Dockerfile ubuntu@172.31.31.93:/home/ubuntu/'
-		    sh 'scp /var/lib/jenkins/workspace/pipeline-test/* ubuntu@172.31.31.93:/home/ubuntu/'
+                    sh 'scp /var/lib/jenkins/workspace/pipeline-test/* ubuntu@172.31.31.93:/home/ubuntu/'
                 }
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'docker build -t nginx-image .'  // Ensure the build context is defined as the current directory
+            }
+        }
+        stage('Docker Run') {
+            steps {
+                sh 'docker run -d -p 8080:80 --name nginx-container nginx-image'
             }
         }
     }
@@ -29,4 +39,3 @@ pipeline {
         }
     }
 }
-
