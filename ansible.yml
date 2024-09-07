@@ -1,0 +1,7 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Create new deployment
+      command: kubectl apply -f /home/ubuntu/pipeline-project/deployment.yml
+    - name: Create new service
+      command: kubectl apply -f /home/ubuntu/pipeline-project/service.yml
