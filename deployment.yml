@@ -15,7 +15,8 @@ spec:
         app: nginx
     spec:
       containers:
-      - name: nginx-app-jenkins
+      - name: barista-app
         image: shahalam8535/pipeline-img
+	imagePullPolicy: Always
         ports:
         - containerPort: 80
