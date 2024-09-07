@@ -1,28 +1,21 @@
-FROM centos:latest
-MAINTAINER shahalam.ansari004@gmail.com
+# Use the official Nginx image as the base image
+FROM nginx:alpine
 
-# Use the CentOS Vault repository instead of the default repositories
-RUN sed -i 's|mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/CentOS-*.repo && \
-    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo
+# Install necessary tools: zip and unzip
+RUN apk add --no-cache zip unzip
 
-# Install required packages
-RUN yum install -y httpd zip unzip
+# Download the zip file and place it in a temporary directory
+ADD https://www.tooplate.com/zip-templates/2137_barista_cafe.zip /tmp/barista_cafe.zip
 
-# Add the photogenic template to the web server
-COPY photogenic.zip /var/www/html/
+# Unzip the contents
+RUN unzip /tmp/barista_cafe.zip -d /tmp/
 
-# Set the working directory and unzip the downloaded template
-WORKDIR /var/www/html/
-RUN unzip photogenic.zip
+# Move the unzipped content to the Nginx HTML folder
+# (assuming the zip file extracts to a directory named `2137_barista_cafe`)
+RUN mv /tmp/2137_barista_cafe/* /usr/share/nginx/html/
 
-# Move the contents of the extracted folder to the current directory
-RUN cp -r photogenic/* .
-
-# Clean up unnecessary files and directories
-RUN rm -rf photogenic photogenic.zip
-
-# Start Apache HTTPD in the foreground
-CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
-
-# Expose port 80 to allow HTTP traffic
+# Expose port 80 to allow traffic to the container
 EXPOSE 80
+
+# Start the Nginx server
+CMD ["nginx", "-g", "daemon off;"]
