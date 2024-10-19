@@ -1,4 +1,4 @@
-# Use the official Nginx image as the base image
+# Use the official Nginx image as the base image changes has done
 FROM nginx:alpine
 
 # Install necessary tools: zip and unzip
